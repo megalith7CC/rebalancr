@@ -1,0 +1,7 @@
+error EmptyBytes32(string paramName);
+
+function validateNotEmpty(bytes32 value, string memory paramName) pure {
+    if (value == bytes32(0)) {
+        revert EmptyBytes32(paramName);
+    }
+}
