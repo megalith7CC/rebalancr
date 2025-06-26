@@ -22,7 +22,6 @@ function processJsonFile(filePath: string, targetDirs: string[]) {
     const fileName = path.basename(filePath, '.json');
     const tsContent = `export const ${fileName}ABI = ${JSON.stringify(jsonData.abi, null, 2)} as const;\n`;
 
-    // Export to all target directories
     targetDirs.forEach(targetDir => {
       const abiDir = path.join(targetDir, 'generated', 'abis');
       ensureDirectoryExists(abiDir);
@@ -51,17 +50,15 @@ function walkDirectory(dir: string, targetDirs: string[]) {
 
     if (stat.isDirectory()) {
       walkDirectory(fullPath, targetDirs);
-    } else if (/^[^.]+\.json$/.test(file)) { // Match <name>.json, ignore <name>.*.json
+    } else if (/^[^.]+\.json$/.test(file)) { 
       processJsonFile(fullPath, targetDirs);
     }
   });
 }
 
-// Get target directories from environment variable
 const exportAddresses = process.env.EXPORT_ADDRESSES ? process.env.EXPORT_ADDRESSES.split(',') : [];
 const deploymentsDir = process.env.REBALANCER_DEPLOYMENTS_DIR || process.cwd();
 
-// Default target directories if EXPORT_ADDRESSES is not set
 const defaultTargets = [
   path.join(__dirname, '..', '..', 'frontend', 'generated'),
   path.join(__dirname, '..', '..', 'agent', 'generated')

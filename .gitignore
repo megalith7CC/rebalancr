@@ -190,3 +190,9 @@ frontend/src/abis
 .github
 .vscode/
 docs/
+.cursor/
+*.md
+**/*.md
+!README.md
+!**/README.md
+deployments.json

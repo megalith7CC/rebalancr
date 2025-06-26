@@ -15,7 +15,6 @@ export function Tooltip({
   position = 'top',
   width = 'auto'
 }: TooltipProps) {
-  // Process multi-line content
   const formattedContent = content.split('\n').map((line, index) => (
     <React.Fragment key={index}>
       {line}
@@ -23,7 +22,6 @@ export function Tooltip({
     </React.Fragment>
   ));
   
-  // Determine position styles
   const getPositionStyles = () => {
     switch (position) {
       case 'top':

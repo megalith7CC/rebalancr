@@ -2,7 +2,7 @@
   "name": "rebalancr",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "scripts": {
     "test": "hardhat test",
     "build": "npm run clean && npm run compile && npm test",
@@ -13,8 +13,11 @@
     "lint": "tsc --noEmit && eslint . --ext .ts",
     "typecheck": "tsc --noEmit",
     "deploy": "hardhat run scripts/deploy.ts",
-    "deploy:localhost": "hardhat run scripts/deploy.ts --network localhost",
-    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:localhost": "node scripts/deploy-local.ts",
+    "deploy:sepolia": "node scripts/deploy-sepolia.ts",
+    "deploy:avalanche": "node scripts/deploy-avalanche.ts",
+    "deploy:avalanche-fuji": "hardhat run scripts/deploy-avalanche-fuji.ts",
+    "deployment-summary": "ts-node scripts/deployment-summary.ts",
     "verify": "hardhat verify --network <network> <contract-address> <constructor-args>"
   },
   "devDependencies": {
@@ -40,7 +43,7 @@
     "typescript": ">=4.5.0"
   },
   "dependencies": {
-    "@aave/core-v3": "^1.19.3",
+    "@aave/protocol-v2": "^1.0.1",
     "@chainlink/contracts": "^1.4.0",
     "@openzeppelin/contracts": "^5.3.0",
     "@traderjoe-xyz/sdk": "^5.0.12",

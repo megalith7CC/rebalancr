@@ -56,7 +56,6 @@ describe('AgentRequestHandler', function () {
 			const { agentRequestHandler } = await loadFixture(deployAgentRequestHandlerFixture);
 			expect(await agentRequestHandler.SUBMIT_REQUEST_PERMISSION()).to.equal(SUBMIT_REQUEST_PERMISSION);
 			expect(await agentRequestHandler.PROCESS_REQUEST_PERMISSION()).to.equal(PROCESS_REQUEST_PERMISSION);
-			// const cooldownPeriod = 60n;
 			expect(await agentRequestHandler.getCooldownPeriod()).to.equal(DEFAULT_COOLDOWN_PERIOD);
 			expect(await agentRequestHandler.getGlobalRequestLimit()).to.equal(DEFAULT_GLOBAL_LIMIT);
 		});

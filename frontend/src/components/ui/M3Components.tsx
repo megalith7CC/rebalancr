@@ -1,6 +1,5 @@
 import React, { useState, useEffect, forwardRef } from 'react';
 
-// Types
 export interface M3ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'filled' | 'outlined' | 'text' | 'elevated' | 'filled-tonal';
   size?: 'small' | 'medium' | 'large';
@@ -32,7 +31,6 @@ export interface M3ChipProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-// Ripple Hook
 const useRipple = () => {
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
@@ -64,7 +62,6 @@ const useRipple = () => {
   return { createRipple, rippleElements };
 };
 
-// M3 Button Component
 export const M3Button = forwardRef<HTMLButtonElement, M3ButtonProps>(({
   variant = 'filled',
   size = 'medium',
@@ -117,7 +114,6 @@ export const M3Button = forwardRef<HTMLButtonElement, M3ButtonProps>(({
 
 M3Button.displayName = 'M3Button';
 
-// M3 Card Component
 export const M3Card = forwardRef<HTMLDivElement, M3CardProps>(({
   variant = 'elevated',
   interactive = false,
@@ -152,7 +148,6 @@ export const M3Card = forwardRef<HTMLDivElement, M3CardProps>(({
 
 M3Card.displayName = 'M3Card';
 
-// M3 FAB Component
 export const M3Fab = forwardRef<HTMLButtonElement, M3FabProps>(({
   size = 'medium',
   icon,
@@ -198,7 +193,6 @@ export const M3Fab = forwardRef<HTMLButtonElement, M3FabProps>(({
 
 M3Fab.displayName = 'M3Fab';
 
-// M3 Chip Component
 export const M3Chip = forwardRef<HTMLDivElement, M3ChipProps>(({
   variant = 'assist',
   selected = false,
@@ -257,7 +251,6 @@ export const M3Chip = forwardRef<HTMLDivElement, M3ChipProps>(({
 
 M3Chip.displayName = 'M3Chip';
 
-// M3 Text Field Component
 export interface M3TextFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   supportingText?: string;
@@ -362,7 +355,6 @@ export const M3TextField = forwardRef<HTMLInputElement, M3TextFieldProps>(({
 
 M3TextField.displayName = 'M3TextField';
 
-// M3 Switch Component
 export interface M3SwitchProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
@@ -418,10 +410,9 @@ export const M3Switch: React.FC<M3SwitchProps> = ({
   );
 };
 
-// M3 Progress Indicator Component
 export interface M3ProgressProps {
   variant?: 'linear' | 'circular';
-  value?: number; // 0-100
+  value?: number; 
   indeterminate?: boolean;
   size?: 'small' | 'medium' | 'large';
   className?: string;

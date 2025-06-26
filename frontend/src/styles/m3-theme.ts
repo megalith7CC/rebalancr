@@ -1,6 +1,4 @@
-// Material Design 3 Theme Configuration for Rebalancr
 export const m3Theme = {
-  // Color Scheme
   colors: {
     primary: {
       main: '#6750A4',
@@ -41,7 +39,6 @@ export const m3Theme = {
     },
   },
   
-  // Typography Scale
   typography: {
     displayLarge: {
       fontFamily: 'Roboto',
@@ -150,7 +147,6 @@ export const m3Theme = {
     },
   },
   
-  // Elevation
   elevation: {
     level0: 'none',
     level1: '0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15)',
@@ -160,7 +156,6 @@ export const m3Theme = {
     level5: '0px 4px 4px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15)',
   },
   
-  // Shape
   shape: {
     cornerNone: '0px',
     cornerExtraSmall: '4px',
@@ -171,7 +166,6 @@ export const m3Theme = {
     cornerFull: '9999px',
   },
   
-  // Motion
   motion: {
     easing: {
       standard: 'cubic-bezier(0.2, 0, 0, 1)',
@@ -188,7 +182,6 @@ export const m3Theme = {
     },
   },
   
-  // Component Specific
   components: {
     button: {
       borderRadius: '20px',
@@ -213,7 +206,6 @@ export const m3Theme = {
   },
 };
 
-// Dark theme overrides
 export const m3DarkTheme = {
   ...m3Theme,
   colors: {
@@ -246,9 +238,8 @@ export const m3DarkTheme = {
   },
 };
 
-// Utility functions for theme usage
 export const getThemeValue = (path: string, theme = m3Theme) => {
-  return path.split('.').reduce((obj, key) => obj?.[key], theme);
+  return path.split('.').reduce((obj: any, key) => obj?.[key], theme);
 };
 
 export const createM3Style = (styles: Record<string, any>) => {
