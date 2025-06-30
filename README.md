@@ -2,7 +2,6 @@
 
 Rebalancr is a decentralized platform that combines off-chain intelligence with on-chain execution to provide autonomous DeFi strategy management. The system leverages ElizaOS agents for strategy intelligence, Chainlink services for reliable data and automation, and a robust smart contract architecture for secure execution.
 
-## 🏆 Hackathon Submission
 
 **Chainlink Integration**: Rebalancr uses Chainlink Price Feeds and Chainlink Automation to create state changes on-chain. See [CHAINLINK_INTEGRATION.md](./CHAINLINK_INTEGRATION.md) for detailed implementation.
 
@@ -10,7 +9,6 @@ Rebalancr is a decentralized platform that combines off-chain intelligence with 
 - PriceFeedOracle: `0x9f1E9B1E5ca887733ab56681a34D801517E82Aac`
 - StrategyPoke: `0xd11E68570541daFbEe6975993819f32ea5A8AA02`
 
-**Video Demo**: [3-5 minute demonstration video] - *[Upload and add link]*
 
 ## System Architecture
 
@@ -38,7 +36,7 @@ Rebalancr follows a three-layer architecture:
 1. **Agent Layer (Off-chain)**
    - ElizaOS runtime for agent execution
    - Strategy intelligence and decision-making
-   - Agent plugins for different strategy types (Yield, Risk, Arbitrage)
+   - Agent plugins for different strategy types (Yield, Risk)
 
 2. **Oracle Layer (Chainlink)**
    - Price feeds for reliable market data
@@ -50,44 +48,107 @@ Rebalancr follows a three-layer architecture:
    - Position management and tracking
    - Access control and security
 
+
+### System Overview
+
+* The smart contracts form a modular execution layer: `AgentRegistry`, `StrategyRouter`, `StrategyAgent`, `PositionManager`, and `AccessController`.
+* The off-chain AI agent (ElizaOS-based) is optional and interacts with contracts through whitelisted agent addresses stored in the `AgentRegistry`.
+* Chainlink Automation will be used only once in the system: to periodically call a the `poke(strategyId)` function, which emits a `CheckRequested(strategyId)` event.
+* The agent listens for this event and runs analysis using off-chain data and Chainlink Functions. If action is required, the agent sends a transaction to the on-chain system.
+
+### Architectural Flow
+
+```plaintext
+                                +------------------------------+
+                                |     Chainlink Automation     |
+                                |   (scheduled on-chain poke)  |
+                                +-------------+----------------+
+                                              |
+                      emits `poke(strategyId)` to wake agent
+                                              |
+                                              v
+               +-------------------------- StrategyPoke.sol ------------------------+
+               | emits `AgentCheckRequested(strategyId)` event                      |
+               +--------------------------------+-----------------------------------+
+                                                |
+                             agent listens via log polling / websocket              
+                                                v
+                                 +----------------------------+
+                                 |      Off-Chain AI Agent     |
+                                 | - ElizaOS-based logic       |
+                                 | - Uses Chainlink Functions  |
+                                 | - Decides action            |
+                                 +--------------+-------------+
+                                                |
+                         sends tx to StrategyRouter (e.g. executeStrategy)
+                                                v
+                      +----------------- StrategyRouter -----------------+
+                      | routes execution to the appropriate strategy      |
+                      +------------------------+--------------------------+
+                                               |
+                                               v
+                                  +------ StrategyAgent ------+
+                                  | - validates + executes    |
+                                  +------------+-------------+
+                                               |
+                                               v
+                                +--------- PositionManager ----------+
+                                | - tracks position lifecycle        |
+                                +------------------------------------+
+                                               |
+                                               v
+                                  +------- Protocol Adapter -------+
+                                  | - interacts with Aave, Beefy, etc |
+                                  +-----------------------------------+
+```
+
+### Sequence Diagram
+
+```plaintext
+  Chainlink Automation        StrategyPoke           Off-Chain Agent         StrategyRouter        StrategyAgent     PositionManager
+          |                        |                        |                        |                    |                   |
+          |--- checkUpkeep() ----->|                        |                        |                    |                   |
+          |<-- upkeepNeeded -------|                        |                        |                    |                   |
+          |--- performUpkeep() --->|                        |                        |                    |                   |
+          |                        |-- emit Events -------->|                        |                    |                   |
+          |                        |                        |-- analyze + fetch --> [Functions / APIs]     |                   |
+          |                        |                        |-- if needed: tx ----->|                    |                   |
+          |                        |                        |                        |-- delegate to --->|                   |
+          |                        |                        |                        |                    |-- position call->|
+```
+
+### Chainlink Service Roles
+
+| Chainlink Service    | Used By          | Purpose                                                    |
+| -------------------- | ---------------- | ---------------------------------------------------------- |
+| Chainlink Data Feeds | Smart Contracts  | On-chain token pricing and slippage protection             |
+| Chainlink Functions  | AI Agent         | External APY, protocol stats, risk scores, sentiment, etc. |
+| Chainlink Automation | StrategyPoke.sol | Emits event to wake agent on schedule                      |
+
+### Smart Contract Roles
+
+| Contract         | Role                                                |
+| ---------------- | --------------------------------------------------- |
+| AgentRegistry    | Authorizes which agent wallet addresses can act     |
+| StrategyRouter   | Dispatches execution to correct strategy module     |
+| StrategyAgent    | Strategy-specific logic (yield, risk, arbitrage)    |
+| PositionManager  | Tracks open/closed/modified positions               |
+| AccessController | Role-based security over sensitive system functions |
+| StrategyPoke.sol | Minimal contract called by Chainlink Automation     |
+
+### Data Flow Summary
+
+* Off-chain agents are event-driven or timer-driven
+* All critical financial logic (APY, risk, position state) is enforced on-chain using Chainlink Data Feeds where required
+* Agents operate entirely off-chain and interact through signed txs
+* Contracts can be used manually (without AI) by sending txs directly to StrategyRouter
+
 ## Repository Structure
 
 - `/agent` - ElizaOS agent implementation
 - `/contracts` - Smart contract implementation
-- `/docs` - Documentation and ADRs
 - `/frontend` - User interface
 
-## Smart Contracts
-
-### Core Contracts
-
-- **AccessController**: Permission management across the system
-- **AgentRegistry**: Authorization of agent operations
-- **PositionManager**: Management of investment positions
-- **StrategyRouter**: Routing of strategy execution requests
-- **BaseStrategyAgent**: Base implementation for strategy contracts
-
-### Chainlink Integration
-
-- **ChainlinkPriceOracle**: Access to reliable price data
-- **MarketDataAggregator**: Comprehensive market data processing
-- **ChainlinkFunctionsConsumer**: External data retrieval and processing
-- **AgentRequestHandler**: Handling of agent requests via Chainlink Functions
-
-### Automation
-
-- **AutomationRegistry**: Registration and management of automation tasks
-- **StrategyAutomationManager**: Strategy-specific automation management
-- **StrategyExecutionBridge**: Bridge between automation triggers and strategy execution
-
-## Agent System
-
-The agent system is built on ElizaOS and consists of:
-
-- **AgentRuntime**: Core execution environment
-- **Providers**: Data providers for agent context
-- **Actions**: Executable operations for strategies
-- **Services**: Specialized functionality for agents
 
 ## Getting Started
 
@@ -97,12 +158,13 @@ The agent system is built on ElizaOS and consists of:
 - Yarn
 - Hardhat
 - ElizaOS CLI
+- Bun
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-org/rebalancr.git
+   git clone https://github.com/megalith7CC/rebalancr.git
    cd rebalancr
    ```
 
@@ -114,7 +176,7 @@ The agent system is built on ElizaOS and consists of:
    
    # Install agent dependencies
    cd ../agent
-   yarn install
+   bun install
    
    # Install frontend dependencies
    cd ../frontend
@@ -128,16 +190,6 @@ The agent system is built on ElizaOS and consists of:
    # Edit .env with your configuration
    ```
 
-### Running Tests
-
-```bash
-# In the contracts directory
-yarn test
-
-# Run specific test
-yarn test test/StrategyRouter.test.ts
-```
-
 ### Local Development
 
 1. Start a local blockchain:
@@ -149,13 +201,13 @@ yarn test test/StrategyRouter.test.ts
 2. Deploy contracts:
    ```bash
    # In the contracts directory
-   yarn deploy:local
+   npx hardhat run scripts/deployment/main.ts --network localhost
    ```
 
 3. Start the agent:
    ```bash
    # In the agent directory
-   yarn start:dev
+   elizaos start
    ```
 
 4. Start the frontend:
@@ -164,50 +216,11 @@ yarn test test/StrategyRouter.test.ts
    yarn dev
    ```
 
-## Architecture Documentation
-
-Detailed architecture documentation is available in the `/docs/adr` directory:
-
-- **ADR-0001**: Decentralized Architecture
-- **ADR-0002**: Agent System Design
-- **ADR-0003**: Smart Contract Architecture
-- **ADR-0004**: Chainlink Integration
-- **ADR-0005**: User Experience
-- **ADR-0006**: MVP Critical Components
-
 ## Deployment
 
-The system can be deployed to various networks:
+Deploying to Avalanche Fuji:
 
 ```bash
-# Deploy to Ethereum mainnet
-yarn deploy:mainnet
-
-# Deploy to Polygon
-yarn deploy:polygon
-
-# Deploy to Arbitrum
-yarn deploy:arbitrum
+cd contracts
+npx hardhat run scripts/deployment/main.ts --network fuji
 ```
-
-## Security
-
-The system includes several security features:
-
-- Access control for all sensitive operations
-- Rate limiting for strategy execution
-- Circuit breakers for abnormal conditions
-- Comprehensive input validation
-- Event logging for transparency
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -am 'Add my feature'`
-4. Push to the branch: `git push origin feature/my-feature`
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
